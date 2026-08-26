@@ -1,0 +1,21 @@
+[Unit]
+Description=homelab-shell-mcp — whitelisted shell execution MCP server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=mcpshell
+Group=mcpshell
+EnvironmentFile=/etc/homelab-shell-mcp.env
+ExecStart=/opt/homelab-shell-mcp/.venv/bin/homelab-shell-mcp
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/log/homelab-shell-mcp
+
+[Install]
+WantedBy=multi-user.target
