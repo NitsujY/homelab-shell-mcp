@@ -10,7 +10,10 @@ ENV_FILE=/etc/homelab-shell-mcp.env
 apk add --no-cache python3 py3-pip
 python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else "need python >= 3.12")'
 
-id mcpshell >/dev/null 2>&1 || adduser -S -H -h "$APP_DIR" -s /sbin/nologin mcpshell
+# busybox adduser does not create a matching group, so do it explicitly
+addgroup -S mcpshell 2>/dev/null || true
+id mcpshell >/dev/null 2>&1 || \
+    adduser -S -H -h "$APP_DIR" -s /sbin/nologin -G mcpshell mcpshell
 
 install -d -o mcpshell -g mcpshell "$APP_DIR" "$APP_DIR/src" "$LOG_DIR"
 install -m 644 pyproject.toml "$APP_DIR/"
