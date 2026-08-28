@@ -62,6 +62,26 @@ tailscale funnel status           # copy the https://<host>.<tailnet>.ts.net URL
 The MCP endpoint for the Perplexity connector is `https://<host>.<tailnet>.ts.net/mcp`
 with header `Authorization: Bearer <MCP_AUTH_TOKEN>`.
 
+### Alpine variant (lighter than Debian)
+
+The server is pure Python and runs fine on Alpine 3.21+ LXC (~100 MB smaller
+template, lower RAM). In the Proxmox web UI pick the `alpine-3.2x-default` CT
+template instead of Debian, then paste this in the LXC console as root:
+
+```bash
+apk add --no-cache curl git tailscale && \
+git clone https://github.com/NitsujY/homelab-shell-mcp.git /opt/src/homelab-shell-mcp && \
+cd /opt/src/homelab-shell-mcp && sh ./install-alpine.sh
+```
+
+Then `tailscale up`, `tailscale funnel 8080 on` (if Funnel commands are missing,
+`rc-service tailscale start` first), and copy the token from
+`/etc/homelab-shell-mcp.env`.
+
+Caveat: Alpine uses OpenRC, not systemd — the service still runs as the
+non-root `mcpshell` user, but the systemd sandboxing directives
+(`ProtectSystem=strict` etc.) have no OpenRC equivalent.
+
 ### 1. Create the LXC in Proxmox
 
 In the Proxmox web UI:
