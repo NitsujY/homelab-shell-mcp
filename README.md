@@ -37,6 +37,31 @@ app itself is plain HTTP on 127.0.0.1:8080.
 
 ## Step-by-step: Proxmox LXC → Tailscale Funnel → Perplexity
 
+### Quick install (one paste, inside the LXC console as root)
+
+After creating the LXC (step 1 below), this single block installs Tailscale,
+the app, and starts the service:
+
+```bash
+apt update && apt install -y curl git && \
+curl -fsSL https://tailscale.com/install.sh | sh && \
+git clone https://github.com/NitsujY/homelab-shell-mcp.git /opt/src/homelab-shell-mcp && \
+cd /opt/src/homelab-shell-mcp && ./install.sh && \
+systemctl enable --now homelab-shell-mcp && systemctl status homelab-shell-mcp --no-pager
+```
+
+Then:
+
+```bash
+tailscale up                      # open the printed login URL
+cat /etc/homelab-shell-mcp.env    # copy MCP_AUTH_TOKEN for the connector
+tailscale funnel 8080 on
+tailscale funnel status           # copy the https://<host>.<tailnet>.ts.net URL
+```
+
+The MCP endpoint for the Perplexity connector is `https://<host>.<tailnet>.ts.net/mcp`
+with header `Authorization: Bearer <MCP_AUTH_TOKEN>`.
+
 ### 1. Create the LXC in Proxmox
 
 In the Proxmox web UI:
