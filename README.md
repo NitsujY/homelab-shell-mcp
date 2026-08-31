@@ -50,6 +50,16 @@ Override defaults via env: `CTID=200 MEMORY=1024 BRIDGE=vmbr1 bash -c "$(...)"`.
 When it finishes it prints the root password and `MCP_AUTH_TOKEN`, then run
 `pct enter <CTID>` → `tailscale up` → `tailscale funnel 8080 on` (steps 4–5 below).
 
+### Already have an LXC? One-liner inside the CT console (as root)
+
+Works on both Debian and Alpine (auto-detects, no bash needed):
+
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/NitsujY/homelab-shell-mcp/main/install-lxc.sh)"
+```
+
+Then `tailscale up` → `tailscale funnel 8080 on` (steps 4–5 below).
+
 ### Quick install (one paste, inside the LXC console as root)
 
 After creating the LXC (step 1 below), this single block installs Tailscale,
