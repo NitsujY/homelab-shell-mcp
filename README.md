@@ -37,6 +37,19 @@ app itself is plain HTTP on 127.0.0.1:8080.
 
 ## Step-by-step: Proxmox LXC → Tailscale Funnel → Perplexity
 
+### One-liner (on the Proxmox host, as root)
+
+Creates the LXC (unprivileged Debian 12, 1 core / 512 MB / 4 GB) and installs
+everything — Tailscale, the app, the systemd service:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/NitsujY/homelab-shell-mcp/main/install-proxmox.sh)"
+```
+
+Override defaults via env: `CTID=200 MEMORY=1024 BRIDGE=vmbr1 bash -c "$(...)"`.
+When it finishes it prints the root password and `MCP_AUTH_TOKEN`, then run
+`pct enter <CTID>` → `tailscale up` → `tailscale funnel 8080 on` (steps 4–5 below).
+
 ### Quick install (one paste, inside the LXC console as root)
 
 After creating the LXC (step 1 below), this single block installs Tailscale,
