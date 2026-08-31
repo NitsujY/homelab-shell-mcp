@@ -17,6 +17,7 @@ else
     exit 1
 fi
 
+cd /        # leave $SRC first in case the script was launched from inside it
 rm -rf "$SRC"
 git clone --depth 1 "$REPO" "$SRC"
 cd "$SRC"
