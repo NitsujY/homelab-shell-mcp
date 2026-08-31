@@ -34,12 +34,22 @@ fi
 grep -q '^MCP_AUTH_TOKEN=' /etc/homelab-shell-mcp.env
 TOKEN=$(cut -d= -f2 /etc/homelab-shell-mcp.env)
 
+echo
+echo "=== App installed ==="
+echo "MCP_AUTH_TOKEN: $TOKEN"
+echo
+
+if [ -n "${TS_AUTHKEY:-}" ]; then
+    tailscale up --authkey="$TS_AUTHKEY"
+else
+    tailscale up    # prints a login URL; open it to join your tailnet
+fi
+
+tailscale funnel 8080 on
+tailscale funnel status
+
 cat <<EOF
 
 === Done ===
-MCP_AUTH_TOKEN: $TOKEN
-Next:
-  tailscale up            # open the login URL
-  tailscale funnel 8080 on
 Endpoint: https://$(hostname).<tailnet>.ts.net/mcp  (Authorization: Bearer <token>)
 EOF
