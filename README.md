@@ -48,7 +48,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/NitsujY/homelab-shell-mc
 
 Override defaults via env: `CTID=200 MEMORY=1024 BRIDGE=vmbr1 bash -c "$(...)"`.
 When it finishes it prints the root password and `MCP_AUTH_TOKEN`, then run
-`pct enter <CTID>` → `tailscale up` → `tailscale funnel 8080 on` (steps 4–5 below).
+`pct enter <CTID>` → `tailscale up` → `tailscale funnel --bg 8080` (steps 4–5 below).
 
 ### Already have an LXC? One-liner inside the CT console (as root)
 
@@ -58,7 +58,7 @@ Works on both Debian and Alpine (auto-detects, no bash needed):
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/NitsujY/homelab-shell-mcp/main/install-lxc.sh)"
 ```
 
-Then `tailscale up` → `tailscale funnel 8080 on` (steps 4–5 below).
+Then `tailscale up` → `tailscale funnel --bg 8080` (steps 4–5 below).
 
 ### Quick install (one paste, inside the LXC console as root)
 
@@ -78,7 +78,7 @@ Then:
 ```bash
 tailscale up                      # open the printed login URL
 cat /etc/homelab-shell-mcp.env    # copy MCP_AUTH_TOKEN for the connector
-tailscale funnel 8080 on
+tailscale funnel --bg 8080
 tailscale funnel status           # copy the https://<host>.<tailnet>.ts.net URL
 ```
 
@@ -97,7 +97,7 @@ git clone https://github.com/NitsujY/homelab-shell-mcp.git /opt/src/homelab-shel
 cd /opt/src/homelab-shell-mcp && sh ./install-alpine.sh
 ```
 
-Then `tailscale up`, `tailscale funnel 8080 on` (if Funnel commands are missing,
+Then `tailscale up`, `tailscale funnel --bg 8080` (if Funnel commands are missing,
 `rc-service tailscale start` first), and copy the token from
 `/etc/homelab-shell-mcp.env`.
 
@@ -165,7 +165,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:8080/mcp \
 ### 4. Expose with Tailscale Funnel
 
 ```bash
-tailscale funnel 8080 on
+tailscale funnel --bg 8080
 tailscale funnel status    # note the https://<host>.<tailnet>.ts.net URL
 ```
 

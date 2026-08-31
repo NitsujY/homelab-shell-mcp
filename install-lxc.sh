@@ -60,7 +60,7 @@ else
     tailscale up    # prints a login URL; open it to join your tailnet
 fi
 
-tailscale funnel 8080 on
+tailscale funnel --bg 8080
 tailscale funnel status
 
 cat <<EOF
