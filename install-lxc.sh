@@ -47,7 +47,7 @@ else
 fi
 
 grep -q '^MCP_AUTH_TOKEN=' /etc/homelab-shell-mcp.env
-TOKEN=$(cut -d= -f2 /etc/homelab-shell-mcp.env)
+TOKEN=$(cut -d= -f2- /etc/homelab-shell-mcp.env)   # f2- : base64 tokens end in =
 
 echo
 echo "=== App installed ==="
