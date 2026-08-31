@@ -12,6 +12,7 @@ app itself is plain HTTP on 127.0.0.1:8080.
 | `run_command(command)` | Run a whitelisted command. Returns `{exit_code, stdout, stderr, duration_ms, truncated}`. |
 | `list_allowed_commands()` | Current whitelist + hard denylist. |
 | `get_recent_commands(limit)` | Recent audit log entries (max 100). |
+| `set_allowed_commands(commands)` | Replace the whitelist at runtime (persisted to `/opt/homelab-shell-mcp/allowed-commands`, no restart needed). The hard denylist is not editable and still wins. |
 
 ## Security model
 
@@ -29,7 +30,8 @@ app itself is plain HTTP on 127.0.0.1:8080.
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `MCP_AUTH_TOKEN` | *(required)* | Bearer token; server refuses to start without it. |
-| `MCP_ALLOWED_COMMANDS` | `ls,cat,df,free,uptime,ps,docker,systemctl,journalctl,tailscale,ping` | Comma-separated whitelist. |
+| `MCP_ALLOWED_COMMANDS` | `ls,cat,df,free,uptime,ps,docker,systemctl,journalctl,tailscale,ping` | Comma-separated whitelist (initial value; `set_allowed_commands` overrides it at runtime). |
+| `MCP_ALLOWED_STATE` | `/opt/homelab-shell-mcp/allowed-commands` | Runtime whitelist state file. |
 | `MCP_CMD_TIMEOUT` | `60` | Per-command timeout in seconds. |
 | `MCP_AUDIT_LOG` | `/var/log/homelab-shell-mcp/audit.jsonl` | Audit log path. |
 

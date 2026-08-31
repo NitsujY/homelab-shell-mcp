@@ -28,10 +28,16 @@ DEFAULT_ALLOWED = (
 )
 MAX_OUTPUT_BYTES = 50 * 1024
 AUDIT_DEFAULT = "/var/log/homelab-shell-mcp/audit.jsonl"
+# Runtime whitelist state; dir is owned by mcpshell in both installers.
+ALLOWED_STATE_DEFAULT = "/opt/homelab-shell-mcp/allowed-commands"
 
 
 def _allowed() -> set[str]:
-    raw = os.environ.get("MCP_ALLOWED_COMMANDS", DEFAULT_ALLOWED)
+    state = Path(os.environ.get("MCP_ALLOWED_STATE", ALLOWED_STATE_DEFAULT))
+    if state.is_file():
+        raw = state.read_text(encoding="utf-8")
+    else:
+        raw = os.environ.get("MCP_ALLOWED_COMMANDS", DEFAULT_ALLOWED)
     return {c.strip() for c in raw.split(",") if c.strip()}
 
 
@@ -149,6 +155,31 @@ def run_command(command: str) -> dict[str, Any]:
 def list_allowed_commands() -> dict[str, Any]:
     """Return the current command whitelist and the hard denylist."""
     return {"allowed": sorted(_allowed()), "denied": sorted(DENYLIST)}
+
+
+@mcp.tool
+def set_allowed_commands(commands: list[str]) -> dict[str, Any]:
+    """Replace the command whitelist (persisted, takes effect immediately).
+
+    The hard denylist is not editable — it still wins over anything added here.
+    """
+    cleaned: set[str] = set()
+    for c in commands:
+        c = c.strip()
+        if not c:
+            continue
+        if "/" in c or any(ch.isspace() for ch in c):
+            raise ToolError(f"invalid command name {c!r}; use bare names like 'ls'")
+        cleaned.add(c)
+    if not cleaned:
+        raise ToolError("refusing to set an empty whitelist")
+    state = Path(os.environ.get("MCP_ALLOWED_STATE", ALLOWED_STATE_DEFAULT))
+    state.parent.mkdir(parents=True, exist_ok=True)
+    state.write_text(",".join(sorted(cleaned)) + "\n", encoding="utf-8")
+    _audit({"timestamp": datetime.now(UTC).isoformat(), "command": None,
+            "argv": None, "exit_code": None, "duration_ms": 0,
+            "truncated": False, "config_change": {"allowed": sorted(cleaned)}})
+    return {"allowed": sorted(cleaned), "denied": sorted(DENYLIST)}
 
 
 @mcp.tool

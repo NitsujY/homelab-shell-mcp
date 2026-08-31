@@ -92,6 +92,34 @@ def test_audit_log_records_blocked():
     assert entries[-1]["blocked"]
 
 
+def test_set_allowed_commands_takes_effect(tmp_path, monkeypatch):
+    monkeypatch.setenv("MCP_ALLOWED_STATE", str(tmp_path / "allowed"))
+    r = srv.set_allowed_commands(["ls", "hostname"])
+    assert r["allowed"] == ["hostname", "ls"]
+    assert srv._allowed() == {"ls", "hostname"}
+    run = srv.run_command("hostname")
+    assert run["exit_code"] == 0
+    with pytest.raises(ToolError, match="not whitelisted"):
+        srv.run_command("df -h")
+
+
+def test_set_allowed_commands_rejects_bad_input(tmp_path, monkeypatch):
+    monkeypatch.setenv("MCP_ALLOWED_STATE", str(tmp_path / "allowed"))
+    with pytest.raises(ToolError, match="invalid command name"):
+        srv.set_allowed_commands(["/bin/ls"])
+    with pytest.raises(ToolError, match="invalid command name"):
+        srv.set_allowed_commands(["ls -la"])
+    with pytest.raises(ToolError, match="empty"):
+        srv.set_allowed_commands([])
+
+
+def test_set_allowed_commands_denylist_still_wins(tmp_path, monkeypatch):
+    monkeypatch.setenv("MCP_ALLOWED_STATE", str(tmp_path / "allowed"))
+    srv.set_allowed_commands(["rm", "ls"])
+    with pytest.raises(ToolError, match="denylist"):
+        srv.run_command("rm -rf /tmp/x")
+
+
 def test_auth_rejection():
     import asyncio
 
