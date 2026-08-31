@@ -9,6 +9,8 @@ SRC=/opt/src/homelab-shell-mcp
 
 if command -v apk >/dev/null; then
     apk add --no-cache curl git tailscale
+    rc-update add tailscale default
+    rc-service tailscale start || echo "WARN: tailscaled failed to start — check /dev/net/tun passthrough in the CT config on the Proxmox host."
 elif command -v apt-get >/dev/null; then
     apt-get update -qq && apt-get install -y -qq curl git
     curl -fsSL https://tailscale.com/install.sh | sh
