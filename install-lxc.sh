@@ -7,10 +7,25 @@ set -eu
 REPO=https://github.com/NitsujY/homelab-shell-mcp.git
 SRC=/opt/src/homelab-shell-mcp
 
+# Tailscale needs /dev/net/tun. An unprivileged CT can't create it, so fail
+# early with the exact host-side fix if it's missing.
+if [ ! -c /dev/net/tun ]; then
+    cat >&2 <<'EOF'
+ERROR: /dev/net/tun is missing. On the Proxmox HOST run (replace CTID):
+
+  CTID=<your-ct-id>
+  printf 'lxc.cgroup2.devices.allow: c 10:200 rwm\nlxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file\n' >> /etc/pve/lxc/$CTID.conf
+  pct reboot $CTID
+
+Then re-run this installer.
+EOF
+    exit 1
+fi
+
 if command -v apk >/dev/null; then
     apk add --no-cache curl git tailscale
     rc-update add tailscale default
-    rc-service tailscale start || echo "WARN: tailscaled failed to start — check /dev/net/tun passthrough in the CT config on the Proxmox host."
+    rc-service tailscale start
 elif command -v apt-get >/dev/null; then
     apt-get update -qq && apt-get install -y -qq curl git
     curl -fsSL https://tailscale.com/install.sh | sh
